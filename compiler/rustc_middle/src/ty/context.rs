@@ -20,10 +20,10 @@ use crate::traits;
 use crate::traits::solve::{ExternalConstraints, ExternalConstraintsData};
 use crate::ty::query::{self, TyCtxtAt};
 use crate::ty::{
-    self, AdtDef, AdtDefData, AdtKind, Binder, Const, ConstData, DefIdTree, FloatTy, FloatVar,
-    FloatVid, GenericParamDefKind, ImplPolarity, InferTy, IntTy, IntVar, IntVid, List, ParamConst,
-    ParamTy, Pattern, PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate, PredicateKind,
-    Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty, TyKind, TyVar, TyVid, TypeAndMut,
+    self, AdtDef, AdtDefData, AdtKind, Binder, Const, ConstData, FloatTy, FloatVar, FloatVid,
+    GenericParamDefKind, ImplPolarity, InferTy, IntTy, IntVar, IntVid, List, ParamConst, ParamTy,
+    Pattern, PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate, PredicateKind, Region,
+    RegionKind, ReprOptions, TraitObjectVisitor, Ty, TyKind, TyVar, TyVid, TypeAndMut,
     TypeckResults, UintTy, Visibility,
 };
 use crate::ty::{GenericArg, InternalSubsts, SubstsRef};
