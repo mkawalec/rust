@@ -225,6 +225,10 @@ pub enum TyKind<I: Interner> {
     /// A placeholder for a type which could not be computed; this is
     /// propagated to avoid useless error messages.
     Error(I::ErrorGuaranteed),
+
+    /// A pattern subtype. Takes any type and restricts it to its pattern.
+    /// Only supports integer range patterns for now.
+    Pat(I::Ty, I::Pat),
 }
 
 impl<I: Interner> TyKind<I> {
@@ -266,6 +270,7 @@ const fn tykind_discriminant<I: Interner>(value: &TyKind<I>) -> usize {
         Infer(_) => 24,
         Error(_) => 25,
         GeneratorWitnessMIR(_, _) => 26,
+        Pat(_, _) => 27,
     }
 }
 
@@ -279,6 +284,7 @@ impl<I: Interner> Clone for TyKind<I> {
             Uint(u) => Uint(*u),
             Float(f) => Float(*f),
             Adt(d, s) => Adt(d.clone(), s.clone()),
+            Pat(t, c) => Pat(t.clone(), c.clone()),
             Foreign(d) => Foreign(d.clone()),
             Str => Str,
             Array(t, c) => Array(t.clone(), c.clone()),
@@ -321,6 +327,7 @@ impl<I: Interner> PartialEq for TyKind<I> {
             (Adt(a_d, a_s), Adt(b_d, b_s)) => a_d == b_d && a_s == b_s,
             (Foreign(a_d), Foreign(b_d)) => a_d == b_d,
             (Array(a_t, a_c), Array(b_t, b_c)) => a_t == b_t && a_c == b_c,
+            (Pat(a_t, a_c), Pat(b_t, b_c)) => a_t == b_t && a_c == b_c,
             (Slice(a_t), Slice(b_t)) => a_t == b_t,
             (RawPtr(a_t), RawPtr(b_t)) => a_t == b_t,
             (Ref(a_r, a_t, a_m), Ref(b_r, b_t, b_m)) => a_r == b_r && a_t == b_t && a_m == b_m,
@@ -379,6 +386,7 @@ impl<I: Interner> Ord for TyKind<I> {
                 (Adt(a_d, a_s), Adt(b_d, b_s)) => a_d.cmp(b_d).then_with(|| a_s.cmp(b_s)),
                 (Foreign(a_d), Foreign(b_d)) => a_d.cmp(b_d),
                 (Array(a_t, a_c), Array(b_t, b_c)) => a_t.cmp(b_t).then_with(|| a_c.cmp(b_c)),
+                (Pat(a_t, a_c), Pat(b_t, b_c)) => a_t.cmp(b_t).then_with(|| a_c.cmp(b_c)),
                 (Slice(a_t), Slice(b_t)) => a_t.cmp(b_t),
                 (RawPtr(a_t), RawPtr(b_t)) => a_t.cmp(b_t),
                 (Ref(a_r, a_t, a_m), Ref(b_r, b_t, b_m)) => {
@@ -467,6 +475,10 @@ impl<I: Interner> hash::Hash for TyKind<I> {
                 s.hash(state);
             }
             Tuple(t) => t.hash(state),
+            Pat(t, p) => {
+                t.hash(state);
+                p.hash(state);
+            }
             Alias(i, p) => {
                 i.hash(state);
                 p.hash(state);
@@ -494,6 +506,7 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
             Uint(u) => f.debug_tuple_field1_finish("Uint", u),
             Float(float) => f.debug_tuple_field1_finish("Float", float),
             Adt(d, s) => f.debug_tuple_field2_finish("Adt", d, s),
+            Pat(f0, f1) => f.debug_tuple_field2_finish("Pat", f0, f1),
             Foreign(d) => f.debug_tuple_field1_finish("Foreign", d),
             Str => f.write_str("Str"),
             Array(t, c) => f.debug_tuple_field2_finish("Array", t, c),
@@ -527,6 +540,7 @@ where
     I::SubstsRef: Encodable<E>,
     I::DefId: Encodable<E>,
     I::Ty: Encodable<E>,
+    I::Pat: Encodable<E>,
     I::Const: Encodable<E>,
     I::Region: Encodable<E>,
     I::TypeAndMut: Encodable<E>,
@@ -561,6 +575,10 @@ where
             Adt(adt, substs) => e.emit_enum_variant(disc, |e| {
                 adt.encode(e);
                 substs.encode(e);
+            }),
+            Pat(ty, pat) => e.emit_enum_variant(disc, |e| {
+                ty.encode(e);
+                pat.encode(e);
             }),
             Foreign(def_id) => e.emit_enum_variant(disc, |e| {
                 def_id.encode(e);
@@ -662,6 +680,7 @@ where
     I::InferTy: Decodable<D>,
     I::PredicateKind: Decodable<D>,
     I::AllocId: Decodable<D>,
+    I::Pat: Decodable<D>,
 {
     fn decode(d: &mut D) -> Self {
         match Decoder::read_usize(d) {
@@ -692,6 +711,7 @@ where
             24 => Infer(Decodable::decode(d)),
             25 => Error(Decodable::decode(d)),
             26 => GeneratorWitnessMIR(Decodable::decode(d), Decodable::decode(d)),
+            27 => Pat(Decodable::decode(d), Decodable::decode(d)),
             _ => panic!(
                 "{}",
                 format!(
@@ -711,6 +731,7 @@ where
     I::DefId: HashStable<CTX>,
     I::SubstsRef: HashStable<CTX>,
     I::Ty: HashStable<CTX>,
+    I::Pat: HashStable<CTX>,
     I::Const: HashStable<CTX>,
     I::TypeAndMut: HashStable<CTX>,
     I::PolyFnSig: HashStable<CTX>,
@@ -749,6 +770,10 @@ where
             Adt(adt, substs) => {
                 adt.hash_stable(__hcx, __hasher);
                 substs.hash_stable(__hcx, __hasher);
+            }
+            Pat(ty, pat) => {
+                ty.hash_stable(__hcx, __hasher);
+                pat.hash_stable(__hcx, __hasher);
             }
             Foreign(def_id) => {
                 def_id.hash_stable(__hcx, __hasher);

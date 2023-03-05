@@ -391,6 +391,22 @@ impl<'tcx> TypeVisitable<TyCtxt<'tcx>> for ty::AdtDef<'tcx> {
     }
 }
 
+impl<'tcx> TypeFoldable<TyCtxt<'tcx>> for ty::Pattern<'tcx> {
+    fn try_fold_with<F: FallibleTypeFolder<TyCtxt<'tcx>>>(
+        self,
+        folder: &mut F,
+    ) -> Result<Self, F::Error> {
+        let pat = (*self).clone().try_fold_with(folder)?;
+        Ok(if pat == *self { self } else { folder.interner().mk_pat(pat) })
+    }
+}
+
+impl<'tcx> TypeVisitable<TyCtxt<'tcx>> for ty::Pattern<'tcx> {
+    fn visit_with<V: TypeVisitor<TyCtxt<'tcx>>>(&self, visitor: &mut V) -> ControlFlow<V::BreakTy> {
+        (**self).visit_with(visitor)
+    }
+}
+
 impl<'tcx, T: TypeFoldable<TyCtxt<'tcx>>> TypeFoldable<TyCtxt<'tcx>> for ty::Binder<'tcx, T> {
     fn try_fold_with<F: FallibleTypeFolder<TyCtxt<'tcx>>>(
         self,
@@ -499,6 +515,8 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             ty::Closure(did, substs) => ty::Closure(did, substs.try_fold_with(folder)?),
             ty::Alias(kind, data) => ty::Alias(kind, data.try_fold_with(folder)?),
 
+            ty::Pat(ty, pat) => ty::Pat(ty.try_fold_with(folder)?, pat.try_fold_with(folder)?),
+
             ty::Bool
             | ty::Char
             | ty::Str
@@ -547,6 +565,11 @@ impl<'tcx> TypeSuperVisitable<TyCtxt<'tcx>> for Ty<'tcx> {
             ty::GeneratorWitnessMIR(_did, ref substs) => substs.visit_with(visitor),
             ty::Closure(_did, ref substs) => substs.visit_with(visitor),
             ty::Alias(_, ref data) => data.visit_with(visitor),
+
+            ty::Pat(ty, pat) => {
+                ty.visit_with(visitor)?;
+                pat.visit_with(visitor)
+            }
 
             ty::Bool
             | ty::Char

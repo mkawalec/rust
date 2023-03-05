@@ -256,7 +256,7 @@ pub struct InferArg {
 }
 
 impl InferArg {
-    pub fn to_ty(&self) -> Ty<'_> {
+    pub fn to_ty(&self) -> Ty<'static> {
         Ty { kind: TyKind::Infer, span: self.span, hir_id: self.hir_id }
     }
 }
@@ -2690,6 +2690,8 @@ pub enum TyKind<'hir> {
     /// `TyKind::Infer` means the type should be inferred instead of it having been
     /// specified. This can appear anywhere in a type.
     Infer,
+    /// Pattern types (such as integers with a bounded range)
+    Pat(&'hir Ty<'hir>, &'hir Pat<'hir>),
     /// Placeholder for a type that has failed to be defined.
     Err(rustc_span::ErrorGuaranteed),
 }

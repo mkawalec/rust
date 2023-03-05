@@ -155,3 +155,8 @@ hir_analysis_cannot_capture_late_bound_ty_in_anon_const =
 hir_analysis_cannot_capture_late_bound_const_in_anon_const =
     cannot capture late-bound const parameter in a constant
     .label = parameter defined here
+
+hir_analysis_pattern_type_wild_pat = "wildcard patterns are not permitted for pattern types"
+    .label = "this type is the same as the inner type without a pattern"
+
+hir_analysis_pattern_type_non_const_range = "range patterns must have constant range start and end"

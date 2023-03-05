@@ -1037,7 +1037,7 @@ fn binding_ty_auto_deref_stability<'tcx>(
                 }
             },
             TyKind::Slice(_) => Position::DerefStable(precedence, false),
-            TyKind::Array(..) | TyKind::Ptr(_) | TyKind::BareFn(_) => Position::DerefStable(precedence, true),
+            TyKind::Pat(..) | TyKind::Array(..) | TyKind::Ptr(_) | TyKind::BareFn(_) => Position::DerefStable(precedence, true),
             TyKind::Never
             | TyKind::Tup(_)
             | TyKind::Path(_) => Position::DerefStable(
@@ -1444,6 +1444,7 @@ fn ty_auto_deref_stability<'tcx>(
             | ty::Int(_)
             | ty::Uint(_)
             | ty::Array(..)
+            | ty::Pat(..)
             | ty::Float(_)
             | ty::RawPtr(..)
             | ty::FnPtr(_) => Position::DerefStable(precedence, true).into(),

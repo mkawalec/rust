@@ -9,6 +9,10 @@ use rustc_macros::Diagnostic;
 use rustc_middle::ty::Ty;
 use rustc_span::{symbol::Ident, Span, Symbol};
 
+mod pattern_types;
+
+pub use pattern_types::*;
+
 #[derive(Diagnostic)]
 #[diag(hir_analysis_unrecognized_atomic_operation, code = "E0092")]
 pub struct UnrecognizedAtomicOperation<'a> {
