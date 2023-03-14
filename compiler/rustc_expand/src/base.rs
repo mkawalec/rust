@@ -1022,6 +1022,12 @@ pub struct ExtCtxt<'a> {
     pub(super) expanded_inert_attrs: MarkedAttrs,
 }
 
+impl<'a> std::fmt::Debug for ExtCtxt<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ExtCtx")
+    }
+}
+
 impl<'a> ExtCtxt<'a> {
     pub fn new(
         sess: &'a Session,
