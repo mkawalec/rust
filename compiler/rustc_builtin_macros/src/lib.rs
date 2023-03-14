@@ -43,6 +43,7 @@ mod env;
 mod format;
 mod format_foreign;
 mod global_allocator;
+mod layout_optimizations;
 mod log_syntax;
 mod source_util;
 mod test;
@@ -108,6 +109,7 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         derive: derive::Expander(false),
         derive_const: derive::Expander(true),
         global_allocator: global_allocator::expand,
+        layout_optimizations: layout_optimizations::expand,
         test: test::expand_test,
         test_case: test::expand_test_case,
     }

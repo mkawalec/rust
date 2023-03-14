@@ -854,6 +854,7 @@ symbols! {
         lang_items,
         large_assignments,
         lateout,
+        layout_optimizations,
         lazy_normalization_consts,
         le,
         len,

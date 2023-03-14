@@ -500,6 +500,7 @@ pub trait Deref {
 #[repr(transparent)]
 #[rustc_layout_scalar_valid_range_start(1)]
 #[rustc_nonnull_optimization_guaranteed]
+#[layout_optimizations(1..1234)]
 pub struct NonNull<T: ?Sized>(pub *const T);
 
 impl<T: ?Sized, U: ?Sized> CoerceUnsized<NonNull<U>> for NonNull<T> where T: Unsize<U> {}
