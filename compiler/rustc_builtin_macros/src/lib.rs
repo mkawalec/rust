@@ -89,6 +89,7 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         include_bytes: source_util::expand_include_bytes,
         include_str: source_util::expand_include_str,
         include: source_util::expand_include,
+        layout_optimizations: layout_optimizations::expand,
         line: source_util::expand_line,
         log_syntax: log_syntax::expand_log_syntax,
         module_path: source_util::expand_mod,
@@ -109,7 +110,6 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         derive: derive::Expander(false),
         derive_const: derive::Expander(true),
         global_allocator: global_allocator::expand,
-        layout_optimizations: layout_optimizations::expand,
         test: test::expand_test,
         test_case: test::expand_test_case,
     }
