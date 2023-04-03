@@ -1574,6 +1574,16 @@ pub(crate) mod builtin {
         /* compiler built-in */
     }
 
+    #[rustc_builtin_macro]
+    #[unstable(
+        feature = "pattern_types",
+        issue = "123456",
+        reason = "macro for gifting a pattern type"
+    )]
+    pub macro layout_optimizations($ty:ty, $expr:expr) {
+        /* compiler built-in */
+    }
+
     /// Unstable implementation detail of the `rustc` compiler, do not use.
     #[rustc_builtin_macro]
     #[stable(feature = "rust1", since = "1.0.0")]

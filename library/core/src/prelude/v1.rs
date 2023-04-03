@@ -103,3 +103,11 @@ pub use crate::macros::builtin::cfg_eval;
     reason = "placeholder syntax for type ascription"
 )]
 pub use crate::macros::builtin::type_ascribe;
+
+
+#[unstable(
+    feature = "pattern_types",
+    issue = "23416",
+    reason = "placeholder syntax for type ascription"
+)]
+pub use crate::macros::builtin::layout_optimizations;
