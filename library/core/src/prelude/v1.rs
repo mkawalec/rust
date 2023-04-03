@@ -110,4 +110,5 @@ pub use crate::macros::builtin::type_ascribe;
     issue = "23416",
     reason = "placeholder syntax for type ascription"
 )]
+#[cfg(not(bootstrap))]
 pub use crate::macros::builtin::layout_optimizations;
