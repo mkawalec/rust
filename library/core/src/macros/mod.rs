@@ -1574,12 +1574,14 @@ pub(crate) mod builtin {
         /* compiler built-in */
     }
 
+    /// Some docs to please the warning
     #[rustc_builtin_macro]
     #[unstable(
         feature = "pattern_types",
         issue = "123456",
         reason = "macro for gifting a pattern type"
     )]
+    #[cfg(not(bootstrap))]
     pub macro layout_optimizations($ty:ty, $expr:expr) {
         /* compiler built-in */
     }
