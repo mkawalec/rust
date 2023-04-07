@@ -1,0 +1,22 @@
+error: Pattern types only support range expressions
+  --> $DIR/layout-optimizations.rs:5:18
+   |
+LL |     type Wrong = layout_optimizations!(u32, 1 | 2);
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-^
+   |                                                 |
+   |                                                 help: try supplying a range expression instead
+
+error[E0308]: mismatched types
+  --> $DIR/layout-optimizations.rs:9:51
+   |
+LL |     let blah: layout_optimizations!(u32, 123..) = 256;
+   |               ---------------------------------   ^^^ expected `(u32) is 123..=`, found integer
+   |               |
+   |               expected due to this
+   |
+   = note: expected pattern type `(u32) is 123..=`
+                      found type `{integer}`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0308`.
